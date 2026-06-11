@@ -908,7 +908,7 @@
     const clientId = getGoogleClientId();
     const validClientId = isValidGoogleClientId(clientId);
     if(input && clientId) input.value = clientId;
-    if(hint) hint.style.display = validClientId ? 'none' : 'block';
+    if(hint) hint.classList.toggle('hidden', validClientId);
     if(validClientId && !renderGoogleButton(clientId) && googleInitRetryCount < 20){
       googleInitRetryCount += 1;
       setTimeout(initGoogleLogin, 500);
@@ -932,7 +932,7 @@
   function startGoogleLogin(){
     const clientId = getGoogleClientId();
     if(!isValidGoogleClientId(clientId)){
-      if($('googleClientHint')) $('googleClientHint').style.display = 'block';
+      if($('googleClientHint')) $('googleClientHint').classList.remove('hidden');
       if($('googleClientIdInput')) $('googleClientIdInput').focus();
       return;
     }
