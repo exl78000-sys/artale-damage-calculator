@@ -188,7 +188,15 @@
           <span id="authStatus" class="muted">請先登入</span>
         </div>
       </div>
-      <div id="googleClientHint" class="hidden"></div>
+      <div id="googleClientHint" class="authBox hidden">
+        <div class="form">
+          <div class="full"><label for="googleClientIdInput">Google Client ID</label><input id="googleClientIdInput" type="text" placeholder="xxxxx.apps.googleusercontent.com"></div>
+        </div>
+        <div class="btns">
+          <button type="button" class="gold" id="saveGoogleClientId">儲存 Google 登入設定</button>
+          <button type="button" class="gray" id="clearGoogleClientId">清除設定</button>
+        </div>
+      </div>
       <div id="leaderboardLocked" class="formula">排行榜已鎖定</div>
       <div class="adminOnly hiddenAdmin">
         <div class="btns">
@@ -221,8 +229,11 @@
 
   const ADMIN_EMAIL = 'exl78000@gmail.com';
   const GOOGLE_CLIENT_ID = '請填入你的 Google Client ID';
+  const GOOGLE_CLIENT_STORAGE = 'artaleDamage.googleClientId';
   let currentGoogleUser = null;
   let isAdmin = false;
+  let googleInitClientId = '';
+  let googleInitRetryCount = 0;
 
   const weaponData = {
     crossbow:{name:'弩手 / 弩',main:'dex',subs:['str'],coef:3.6}, bow:{name:'弓手 / 弓',main:'dex',subs:['str'],coef:3.4}, gun:{name:'槍手 / 火槍',main:'dex',subs:['str'],coef:3.6}, knuckle:{name:'拳霸 / 指虎',main:'str',subs:['dex'],coef:4.8}, claw:{name:'盜賊 / 拳套',main:'luk',subs:['dex','str'],coef:3.6}, dagger:{name:'盜賊 / 短劍',main:'luk',subs:['dex','str'],coef:3.6}, oneHandSword:{name:'單手劍',main:'str',subs:['dex'],coef:4.0}, twoHandSword:{name:'雙手劍',main:'str',subs:['dex'],coef:4.6}, spearStab:{name:'槍 / 戳',main:'str',subs:['dex'],coef:5.0}, spearSwing:{name:'槍 / 砍',main:'str',subs:['dex'],coef:3.0}, polearmSwing:{name:'矛 / 砍',main:'str',subs:['dex'],coef:5.0}, polearmStab:{name:'矛 / 戳',main:'str',subs:['dex'],coef:3.0}, custom:{name:'自訂',main:'dex',subs:['str'],coef:3.6}
@@ -845,6 +856,34 @@
     updateAuthUI();
   }
 
+  function isValidGoogleClientId(clientId){
+    return !!clientId && clientId.includes('.apps.googleusercontent.com') && !clientId.includes('請填入');
+  }
+
+  function getGoogleClientId(){
+    const baked = String(GOOGLE_CLIENT_ID || '').trim();
+    if(isValidGoogleClientId(baked)) return baked;
+    try{
+      const saved = String(localStorage.getItem(GOOGLE_CLIENT_STORAGE) || '').trim();
+      return isValidGoogleClientId(saved) ? saved : '';
+    }catch(e){ return ''; }
+  }
+
+  function renderGoogleButton(clientId){
+    const box = $('googleSignInBox');
+    if(!box || !clientId) return false;
+    if(!(window.google && google.accounts && google.accounts.id)) return false;
+    if(googleInitClientId !== clientId){
+      box.innerHTML = '';
+      google.accounts.id.initialize({ client_id: clientId, callback: handleGoogleCredential });
+      googleInitClientId = clientId;
+    }
+    if(!box.childElementCount){
+      google.accounts.id.renderButton(box, { theme:'outline', size:'large', text:'signin_with', shape:'pill' });
+    }
+    return true;
+  }
+
   function initGoogleLogin(){
     try{
       const cached = sessionStorage.getItem('artaleGoogleUser');
@@ -854,13 +893,39 @@
       }
     }catch(e){}
     const hint = $('googleClientHint');
-    const validClientId = GOOGLE_CLIENT_ID && !GOOGLE_CLIENT_ID.includes('請填入') && GOOGLE_CLIENT_ID.includes('.apps.googleusercontent.com');
+    const input = $('googleClientIdInput');
+    const clientId = getGoogleClientId();
+    const validClientId = isValidGoogleClientId(clientId);
+    if(input && clientId) input.value = clientId;
     if(hint) hint.style.display = validClientId ? 'none' : 'block';
-    if(validClientId && window.google && google.accounts && google.accounts.id){
-      google.accounts.id.initialize({ client_id: GOOGLE_CLIENT_ID, callback: handleGoogleCredential });
-      google.accounts.id.renderButton($('googleSignInBox'), { theme:'outline', size:'large', text:'signin_with', shape:'pill' });
+    if(validClientId && !renderGoogleButton(clientId) && googleInitRetryCount < 20){
+      googleInitRetryCount += 1;
+      setTimeout(initGoogleLogin, 500);
     }
     updateAuthUI();
+  }
+
+  function saveGoogleClientId(){
+    const clientId = raw('googleClientIdInput');
+    if(!isValidGoogleClientId(clientId)){
+      alert('請輸入有效的 Google Client ID');
+      if($('googleClientIdInput')) $('googleClientIdInput').focus();
+      return;
+    }
+    try{ localStorage.setItem(GOOGLE_CLIENT_STORAGE, clientId); }catch(e){}
+    googleInitClientId = '';
+    googleInitRetryCount = 0;
+    initGoogleLogin();
+  }
+
+  function clearGoogleClientId(){
+    try{ localStorage.removeItem(GOOGLE_CLIENT_STORAGE); }catch(e){}
+    if($('googleClientIdInput')) $('googleClientIdInput').value = '';
+    if($('googleSignInBox')) $('googleSignInBox').innerHTML = '';
+    googleInitClientId = '';
+    googleInitRetryCount = 0;
+    updateAuthUI();
+    initGoogleLogin();
   }
 
   function signOutGoogle(){
@@ -907,6 +972,8 @@
   $('tabLeaderboard').addEventListener('click', () => showPage('leaderboard'));
   $('openLeaderboard').addEventListener('click', () => showPage('leaderboard'));
   $('googleSignOut').addEventListener('click', signOutGoogle);
+  $('saveGoogleClientId').addEventListener('click', saveGoogleClientId);
+  $('clearGoogleClientId').addEventListener('click', clearGoogleClientId);
   $('exportRank').addEventListener('click', () => { const box=$('rankJsonBox'); box.style.display='block'; box.value=JSON.stringify(readRanks(), null, 2); });
   $('importRank').addEventListener('click', () => { const box=$('rankJsonBox'); box.style.display='block'; if(!box.value.trim()){ alert('請先把 JSON 貼到下方文字框，再按一次匯入'); return; } try{ const arr=JSON.parse(box.value); if(!Array.isArray(arr)) throw new Error('not array'); writeRanks(arr); renderLeaderboard(); alert('已匯入排行榜'); }catch(e){ alert('JSON 格式錯誤'); } });
   calculateAll();
