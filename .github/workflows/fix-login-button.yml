@@ -1,0 +1,37 @@
+name: Fix login button visibility
+
+on:
+  push:
+    paths:
+      - .github/workflows/fix-login-button.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Patch index.html
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('index.html')
+          s = p.read_text(encoding='utf-8')
+          s = s.replace("if(hint) hint.style.display = validClientId ? 'none' : 'block';", "if(hint) hint.classList.toggle('hidden', validClientId);")
+          s = s.replace("if($('googleClientHint')) $('googleClientHint').style.display = 'block';", "if($('googleClientHint')) $('googleClientHint').classList.remove('hidden');")
+          p.write_text(s, encoding='utf-8')
+          PY
+      - name: Commit patch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "Fix Google login configuration visibility"
+            git push
+          fi
