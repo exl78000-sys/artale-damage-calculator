@@ -83,7 +83,7 @@
 <script>
 const ADMIN_EMAIL='exl78000@gmail.com';
 const LEADERBOARD_COLLECTION='artaleDamageLeaderboard';
-const firebaseConfig={apiKey:"AIzaSyBef1cCwP2uv8kN0A1cA0yopFTU4y-7txs",authDomain:"boss-app-34bcd.firebaseapp.com",projectId:"boss-app-34bcd",storageBucket:"boss-app-34bcd.firebasestorage.app",messagingSenderId:"728632211313",appId:"1:728632211313:web:66f966b8b7ccf6cb3ee8d0",measurementId:"G-PN361HPV2J"};
+const firebaseConfig={apiKey:"AIzaSyATlIUIlSvtSlbY2mnGZOqNkDdGhR47Yok",authDomain:"artale-damage-calculator-e57cf.firebaseapp.com",projectId:"artale-damage-calculator-e57cf",storageBucket:"artale-damage-calculator-e57cf.firebasestorage.app",messagingSenderId:"8251838682",appId:"1:8251838682:web:396910084706b8a45e55e3",measurementId:"G-1LHDX3SDDW"};
 let app,auth,db,currentUser=null,isAdmin=false,bless=0,lastCalc=null,appliedA=false,rankUnsub=null;
 const $=id=>document.getElementById(id);const n=id=>{const v=parseFloat($(id).value);return Number.isFinite(v)?v:0};const fmt=x=>Number.isFinite(x)?Math.floor(x).toLocaleString():'-';
 function toast(t){const d=document.createElement('div');d.className='toast';d.textContent=t;document.body.appendChild(d);setTimeout(()=>d.remove(),2300)}
