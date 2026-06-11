@@ -1,0 +1,80 @@
+name: Add login button
+
+on:
+  push:
+    paths:
+      - .github/workflows/add-login-button.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Patch index.html
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('index.html')
+          s = p.read_text(encoding='utf-8')
+
+          if 'id="googleLoginButton"' not in s:
+            s = s.replace(
+              '          <div id="googleSignInBox"></div>\n          <button type="button" class="gray" id="googleSignOut" style="display:none">登出</button>',
+              '          <div id="googleSignInBox"></div>\n          <button type="button" class="gray" id="googleLoginButton">登入</button>\n          <button type="button" class="gray" id="googleSignOut" style="display:none">登出</button>'
+            )
+
+          if "const loginButton = $('googleLoginButton');" not in s:
+            s = s.replace(
+              "    const status = $('authStatus');\n    const signOut = $('googleSignOut');",
+              "    const status = $('authStatus');\n    const loginButton = $('googleLoginButton');\n    const signOut = $('googleSignOut');"
+            )
+          if "if(loginButton) loginButton.style.display" not in s:
+            s = s.replace(
+              "    if(locked) locked.textContent = !currentGoogleUser ? '請先登入管理者帳號查看排行榜' : (isAdmin ? '' : '非管理者無法查看排行榜');\n    if(signOut) signOut.style.display = currentGoogleUser ? 'inline-flex' : 'none';",
+              "    if(locked) locked.textContent = !currentGoogleUser ? '請先登入管理者帳號查看排行榜' : (isAdmin ? '' : '非管理者無法查看排行榜');\n    if(loginButton) loginButton.style.display = currentGoogleUser ? 'none' : 'inline-flex';\n    if(signOut) signOut.style.display = currentGoogleUser ? 'inline-flex' : 'none';"
+            )
+
+          if 'function startGoogleLogin(){' not in s:
+            marker = '  function clearGoogleClientId(){'
+            insert = '\n'.join([
+              '  function startGoogleLogin(){',
+              '    const clientId = getGoogleClientId();',
+              '    if(!isValidGoogleClientId(clientId)){',
+              "      if($('googleClientHint')) $('googleClientHint').style.display = 'block';",
+              "      if($('googleClientIdInput')) $('googleClientIdInput').focus();",
+              '      return;',
+              '    }',
+              '    googleInitRetryCount = 0;',
+              '    if(renderGoogleButton(clientId) && window.google && google.accounts && google.accounts.id){',
+              '      google.accounts.id.prompt();',
+              '    }else{',
+              '      initGoogleLogin();',
+              '    }',
+              '  }',
+              '',
+            ])
+            s = s.replace(marker, insert + marker)
+
+          if "googleLoginButton').addEventListener" not in s:
+            s = s.replace(
+              "  $('openLeaderboard').addEventListener('click', () => showPage('leaderboard'));\n  $('googleSignOut').addEventListener('click', signOutGoogle);",
+              "  $('openLeaderboard').addEventListener('click', () => showPage('leaderboard'));\n  $('googleLoginButton').addEventListener('click', startGoogleLogin);\n  $('googleSignOut').addEventListener('click', signOutGoogle);"
+            )
+
+          p.write_text(s, encoding='utf-8')
+          PY
+      - name: Commit patch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "Add explicit Google login button"
+            git push
+          fi
