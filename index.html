@@ -35,6 +35,7 @@
       <div>
         <div class="topAuth">
           <div id="googleSignInBox"></div>
+          <button type="button" class="gray" id="googleLoginButton">登入</button>
           <button type="button" class="gray" id="googleSignOut" style="display:none">登出</button>
           <span id="authStatus" class="muted authStatus">請先登入</span>
         </div>
@@ -824,6 +825,7 @@
 
   function updateAuthUI(){
     const status = $('authStatus');
+    const loginButton = $('googleLoginButton');
     const signOut = $('googleSignOut');
     const locked = $('leaderboardLocked');
     const tabLeaderboard = $('tabLeaderboard');
@@ -833,6 +835,7 @@
     document.querySelectorAll('.adminOnly').forEach(el => el.classList.toggle('hiddenAdmin', !isAdmin));
     if(locked) locked.style.display = isAdmin ? 'none' : 'block';
     if(locked) locked.textContent = !currentGoogleUser ? '請先登入管理者帳號查看排行榜' : (isAdmin ? '' : '非管理者無法查看排行榜');
+    if(loginButton) loginButton.style.display = currentGoogleUser ? 'none' : 'inline-flex';
     if(signOut) signOut.style.display = currentGoogleUser ? 'inline-flex' : 'none';
     if(status){
       if(!currentGoogleUser){
@@ -926,6 +929,20 @@
     initGoogleLogin();
   }
 
+  function startGoogleLogin(){
+    const clientId = getGoogleClientId();
+    if(!isValidGoogleClientId(clientId)){
+      if($('googleClientHint')) $('googleClientHint').style.display = 'block';
+      if($('googleClientIdInput')) $('googleClientIdInput').focus();
+      return;
+    }
+    googleInitRetryCount = 0;
+    if(renderGoogleButton(clientId) && window.google && google.accounts && google.accounts.id){
+      google.accounts.id.prompt();
+    }else{
+      initGoogleLogin();
+    }
+  }
   function clearGoogleClientId(){
     try{ localStorage.removeItem(GOOGLE_CLIENT_STORAGE); }catch(e){}
     if($('googleClientIdInput')) $('googleClientIdInput').value = '';
@@ -979,6 +996,7 @@
   $('tabCalc').addEventListener('click', () => showPage('calc'));
   $('tabLeaderboard').addEventListener('click', () => showPage('leaderboard'));
   $('openLeaderboard').addEventListener('click', () => showPage('leaderboard'));
+  $('googleLoginButton').addEventListener('click', startGoogleLogin);
   $('googleSignOut').addEventListener('click', signOutGoogle);
   $('saveGoogleClientId').addEventListener('click', saveGoogleClientId);
   $('clearGoogleClientId').addEventListener('click', clearGoogleClientId);
