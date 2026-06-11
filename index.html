@@ -16,7 +16,7 @@
     .mapleChoice{background:rgba(2,6,23,.34);border:1px solid rgba(148,163,184,.16);border-radius:14px;padding:12px}.mapleBtns{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}.mapleBtn{background:var(--card2);border:1px solid var(--line);font-size:14px;padding:10px 8px}.mapleBtn.active{background:var(--gold);color:#111827;border-color:rgba(245,158,11,.9)}@media(max-width:560px){.mapleBtns{grid-template-columns:repeat(2,minmax(0,1fr))}.mapleBtn{width:100%}}
     #cardA,#cardB{display:flex;flex-direction:column}#cardB>.title{order:0}#cardB>.form{order:1}#cardB>.big{order:2}#cardB>.formula{order:3}#cardB>.recordPanel{order:4;margin-top:12px;margin-bottom:0}.buffChoice{background:rgba(2,6,23,.34);border:1px solid rgba(148,163,184,.16);border-radius:14px;padding:12px}
 
-    .pageTabs{display:flex;flex-wrap:wrap;gap:10px;margin:14px 0 4px}.pageTab{background:var(--card2);border:1px solid var(--line)}.pageTab.active{background:var(--blue);border-color:rgba(96,165,250,.75)}.page{display:block}.page.hiddenPage{display:none}.leaderTools{display:grid;grid-template-columns:1fr 1fr;gap:10px}.tableWrap{overflow:auto;border:1px solid rgba(148,163,184,.16);border-radius:14px;background:rgba(2,6,23,.35)}table{width:100%;border-collapse:collapse;min-width:760px}th,td{border-bottom:1px solid rgba(148,163,184,.14);padding:10px;text-align:left;font-size:14px;white-space:nowrap}th{color:#bfdbfe;background:rgba(37,99,235,.16);font-weight:900}td.rankNo{font-weight:950;color:#fde68a}.rowActions button{font-size:13px;padding:8px 10px}.rankTop{font-weight:950;color:#fde68a}@media(max-width:900px){.leaderTools{grid-template-columns:1fr}}
+    .topBar{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}.pageTabs{display:flex;flex-wrap:wrap;gap:10px;margin:14px 0 4px}.pageTab{background:var(--card2);border:1px solid var(--line)}.pageTab.active{background:var(--blue);border-color:rgba(96,165,250,.75)}.topAuth{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:flex-end;margin-top:2px}.topAuth .authStatus{font-size:13px;white-space:nowrap}.googleConfig{margin:8px 0 0 auto;max-width:460px}.page{display:block}.page.hiddenPage{display:none}.leaderTools{display:grid;grid-template-columns:1fr 1fr;gap:10px}.tableWrap{overflow:auto;border:1px solid rgba(148,163,184,.16);border-radius:14px;background:rgba(2,6,23,.35)}table{width:100%;border-collapse:collapse;min-width:760px}th,td{border-bottom:1px solid rgba(148,163,184,.14);padding:10px;text-align:left;font-size:14px;white-space:nowrap}th{color:#bfdbfe;background:rgba(37,99,235,.16);font-weight:900}td.rankNo{font-weight:950;color:#fde68a}.rowActions button{font-size:13px;padding:8px 10px}.rankTop{font-weight:950;color:#fde68a}@media(max-width:900px){.topBar{display:block}.topAuth{justify-content:flex-start}.googleConfig{margin-left:0}.leaderTools{grid-template-columns:1fr}}
     @media(max-width:900px){.grid,.grid2{grid-template-columns:1fr}.compare{grid-template-columns:1fr}.range,.dpm{font-size:30px}.form3{grid-template-columns:1fr 1fr}}
     @media(max-width:560px){body{padding:12px}.form,.form3{grid-template-columns:1fr}.stats{grid-template-columns:1fr 1fr}.top h1{font-size:24px}button{width:100%}.btns{gap:8px}.card{padding:13px}.range,.dpm{font-size:28px}}
   </style>
@@ -24,10 +24,30 @@
 <body>
 <div class="wrap">
   <div class="top">
-    <h1>Artale 表攻 + OOVS 換算器 v25</h1>
-    <div class="pageTabs">
-      <button type="button" class="pageTab active" id="tabCalc">換算器</button>
-      <button type="button" class="pageTab" id="tabLeaderboard">排行榜</button>
+    <div class="topBar">
+      <div>
+        <h1>Artale 表攻 + OOVS 換算器 v25</h1>
+        <div class="pageTabs">
+          <button type="button" class="pageTab active" id="tabCalc">換算器</button>
+          <button type="button" class="pageTab hidden" id="tabLeaderboard">排行榜</button>
+        </div>
+      </div>
+      <div>
+        <div class="topAuth">
+          <div id="googleSignInBox"></div>
+          <button type="button" class="gray" id="googleSignOut" style="display:none">登出</button>
+          <span id="authStatus" class="muted authStatus">請先登入</span>
+        </div>
+        <div id="googleClientHint" class="authBox googleConfig hidden">
+          <div class="form">
+            <div class="full"><label for="googleClientIdInput">Google Client ID</label><input id="googleClientIdInput" type="text" placeholder="xxxxx.apps.googleusercontent.com"></div>
+          </div>
+          <div class="btns">
+            <button type="button" class="gold" id="saveGoogleClientId">儲存 Google 登入設定</button>
+            <button type="button" class="gray" id="clearGoogleClientId">清除設定</button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -181,22 +201,6 @@
     <div class="sectionTitle">三、排行榜</div>
     <section class="card">
       <p class="title">排行榜 <span class="pill">目前為本機紀錄版</span></p>
-      <div class="authBox">
-        <div class="authRow">
-          <div id="googleSignInBox"></div>
-          <button type="button" class="gray" id="googleSignOut" style="display:none">登出</button>
-          <span id="authStatus" class="muted">請先登入</span>
-        </div>
-      </div>
-      <div id="googleClientHint" class="authBox hidden">
-        <div class="form">
-          <div class="full"><label for="googleClientIdInput">Google Client ID</label><input id="googleClientIdInput" type="text" placeholder="xxxxx.apps.googleusercontent.com"></div>
-        </div>
-        <div class="btns">
-          <button type="button" class="gold" id="saveGoogleClientId">儲存 Google 登入設定</button>
-          <button type="button" class="gray" id="clearGoogleClientId">清除設定</button>
-        </div>
-      </div>
       <div id="leaderboardLocked" class="formula">排行榜已鎖定</div>
       <div class="adminOnly hiddenAdmin">
         <div class="btns">
@@ -822,6 +826,10 @@
     const status = $('authStatus');
     const signOut = $('googleSignOut');
     const locked = $('leaderboardLocked');
+    const tabLeaderboard = $('tabLeaderboard');
+    const openLeaderboard = $('openLeaderboard');
+    if(tabLeaderboard) tabLeaderboard.classList.toggle('hidden', !isAdmin);
+    if(openLeaderboard) openLeaderboard.classList.toggle('hidden', !isAdmin);
     document.querySelectorAll('.adminOnly').forEach(el => el.classList.toggle('hiddenAdmin', !isAdmin));
     if(locked) locked.style.display = isAdmin ? 'none' : 'block';
     if(locked) locked.textContent = !currentGoogleUser ? '請先登入管理者帳號查看排行榜' : (isAdmin ? '' : '非管理者無法查看排行榜');
@@ -938,8 +946,8 @@
 
   function showPage(page){
     let isRank = page === 'leaderboard';
-    if(isRank && currentGoogleUser && !isAdmin){
-      alert('非管理者無法查看排行榜');
+    if(isRank && !isAdmin){
+      alert(currentGoogleUser ? '非管理者無法查看排行榜' : '請先用管理者帳號登入');
       isRank = false;
     }
     $('calcPage').classList.toggle('hiddenPage', isRank);
