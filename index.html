@@ -1,1 +1,114 @@
-PLACEHOLDER
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>Artale 表攻 + OOVS 排行榜</title>
+  <style>
+    :root{--bg:#0b1220;--card:#111827;--card2:#1f2937;--text:#e5e7eb;--muted:#9ca3af;--line:#374151;--blue:#2563eb;--green:#16a34a;--red:#dc2626;--gold:#f59e0b;--input:#020617}*{box-sizing:border-box}body{margin:0;padding:16px;background:linear-gradient(180deg,#172554,#020617 420px);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans TC",Arial,sans-serif}.wrap{max-width:1180px;margin:auto}.topbar{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:14px}.brand h1{margin:0;font-size:24px}.tabs{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 14px}.card{background:rgba(17,24,39,.94);border:1px solid rgba(148,163,184,.2);border-radius:18px;padding:15px;box-shadow:0 15px 40px rgba(0,0,0,.25);margin-bottom:14px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.full{grid-column:1/-1}label{display:block;font-size:13px;color:var(--muted);margin-bottom:5px}input,select{width:100%;font-size:16px;color:var(--text);background:var(--input);border:1px solid var(--line);border-radius:12px;padding:11px;outline:none}input:focus,select:focus{border-color:#60a5fa;box-shadow:0 0 0 3px rgba(96,165,250,.15)}button{border:0;border-radius:12px;background:var(--blue);color:white;font-weight:900;font-size:15px;padding:11px 13px;cursor:pointer}button.gray{background:var(--card2);border:1px solid var(--line)}button.green{background:var(--green)}button.gold{background:var(--gold);color:#111827}.btns{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}.title{font-weight:900;margin-bottom:10px}.muted{color:var(--muted);font-size:13px;line-height:1.5}.result{border:1px solid rgba(96,165,250,.35);background:rgba(37,99,235,.18);border-radius:16px;padding:15px;text-align:center}.range{font-size:34px;font-weight:950;margin:6px 0}.dpm{font-size:30px;font-weight:950;margin:6px 0}.pill{display:inline-flex;gap:6px;align-items:center;padding:6px 10px;border:1px solid var(--line);border-radius:999px;background:rgba(2,6,23,.35);color:#dbeafe}.check{display:flex;align-items:center;gap:7px;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:rgba(2,6,23,.45)}input[type=checkbox]{width:20px;height:20px;accent-color:var(--blue)}table{width:100%;border-collapse:collapse;overflow:hidden;border-radius:12px}th,td{padding:10px;border-bottom:1px solid var(--line);text-align:left;font-size:14px}th{color:#bfdbfe;background:rgba(37,99,235,.18)}.hidden{display:none!important}.rightAuth{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end}.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#111827;border:1px solid #60a5fa;color:#fff;padding:12px 16px;border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,.4);z-index:99}.attrs{display:grid;grid-template-columns:70px 1fr 1fr;gap:8px;align-items:end}.attrs b{padding-bottom:12px;color:#cbd5e1}@media(max-width:900px){.grid,.grid3{grid-template-columns:1fr}.topbar{align-items:flex-start;flex-direction:column}.rightAuth{justify-content:flex-start}.form{grid-template-columns:1fr}.range{font-size:28px}.dpm{font-size:26px}}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar">
+    <div class="brand"><h1>Artale 表攻 + OOVS</h1><div class="muted">Firebase Auth + Google 登入 + Firestore 排行榜</div></div>
+    <div class="rightAuth"><span id="authInfo" class="pill">未登入</span><button id="loginBtn">Google 登入</button><button id="logoutBtn" class="gray hidden">登出</button></div>
+  </div>
+  <div class="tabs"><button id="tabCalc">換算器</button><button id="tabRank" class="gray">排行榜</button></div>
+
+  <section id="calcPage">
+    <div class="grid">
+      <div class="card">
+        <div class="title">表單一：表攻換算</div>
+        <div class="form">
+          <div class="full"><label>角色名稱</label><input id="charName" placeholder="例如：糾結倫"></div>
+          <div><label>武器 / 職業</label><select id="weaponType"></select></div>
+          <div><label>熟練度</label><select id="mastery"><option value="0.9">4轉 90%</option><option value="0.6">3轉 60%</option><option value="0.8">80%</option><option value="1">100%</option></select></div>
+          <div class="full">
+            <label>能力值：每屬性主 + 副 = 實際屬性；楓葉祝福只套用主欄，且無條件捨去</label>
+            <div class="attrs"><b>STR</b><input id="strMain" inputmode="decimal" placeholder="主"><input id="strSub" inputmode="decimal" placeholder="副"></div>
+            <div class="attrs"><b>DEX</b><input id="dexMain" inputmode="decimal" placeholder="主"><input id="dexSub" inputmode="decimal" placeholder="副"></div>
+            <div class="attrs"><b>INT</b><input id="intMain" inputmode="decimal" placeholder="主"><input id="intSub" inputmode="decimal" placeholder="副"></div>
+            <div class="attrs"><b>LUK</b><input id="lukMain" inputmode="decimal" placeholder="主"><input id="lukSub" inputmode="decimal" placeholder="副"></div>
+          </div>
+          <div><label>武器攻</label><input id="atkWeapon" inputmode="decimal"></div><div><label>手套攻</label><input id="atkGlove" inputmode="decimal"></div>
+          <div><label>箭矢 / 子彈攻</label><input id="atkAmmo" inputmode="decimal"></div><div><label>其他攻</label><input id="atkOther" inputmode="decimal"></div>
+          <div class="full"><label>楓葉祝福</label><div class="btns" id="blessBtns"><button class="gray" data-v="0">不套用</button><button class="gray" data-v="0.05">Lv10</button><button class="gray" data-v="0.10">Lv20</button><button class="gray" data-v="0.15">Lv30</button></div></div>
+          <label class="check full"><input id="snow" type="checkbox">雪花：等同其他攻擊力 +20</label>
+        </div>
+        <div class="btns"><button id="applyA" class="green">套用表攻到 A 配置</button><button id="clearCalc" class="gray">清空</button></div>
+      </div>
+      <div class="card">
+        <div class="title">表攻結果</div>
+        <div class="result"><div class="muted">Min ～ Max</div><div id="damageRange" class="range">-</div><div id="calcDetail" class="muted">請輸入數值</div></div>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="card">
+        <div class="title">A 配置</div>
+        <div class="form">
+          <div><label>名稱</label><input id="aName"></div><div><label>輸出模式</label><select id="aMode"></select></div>
+          <div><label>Min</label><input id="aMin" inputmode="decimal"></div><div><label>Max</label><input id="aMax" inputmode="decimal"></div>
+          <div><label>技能等級</label><input id="aSkill" inputmode="numeric" value="30"></div><div><label>目標等級</label><input id="aLevel" inputmode="numeric" value="200"></div>
+          <div><label>鳳凰等級</label><input id="aPhoenix" inputmode="numeric" value="30"></div><div><label>精準砲擊</label><input id="aPrecision" inputmode="numeric" value="20"></div>
+          <label class="check"><input id="aSE" type="checkbox">會心</label><label class="check"><input id="aSI" type="checkbox">最終極速</label>
+        </div>
+        <div class="result" style="margin-top:12px"><div class="muted">A DPM</div><div id="aDpm" class="dpm">-</div></div>
+      </div>
+      <div class="card">
+        <div class="title">B 配置</div>
+        <div class="form">
+          <div><label>名稱</label><input id="bName"></div><div><label>輸出模式</label><select id="bMode"></select></div>
+          <div><label>Min</label><input id="bMin" inputmode="decimal"></div><div><label>Max</label><input id="bMax" inputmode="decimal"></div>
+          <div><label>技能等級</label><input id="bSkill" inputmode="numeric" value="30"></div><div><label>目標等級</label><input id="bLevel" inputmode="numeric" value="200"></div>
+          <div><label>鳳凰等級</label><input id="bPhoenix" inputmode="numeric" value="30"></div><div><label>精準砲擊</label><input id="bPrecision" inputmode="numeric" value="20"></div>
+          <label class="check"><input id="bSE" type="checkbox">會心</label><label class="check"><input id="bSI" type="checkbox">最終極速</label>
+        </div>
+        <div class="btns"><button id="resetB" class="gray">重設 B 配置</button></div>
+        <div class="result" style="margin-top:12px"><div class="muted">B DPM</div><div id="bDpm" class="dpm">-</div></div>
+      </div>
+    </div>
+    <div class="card"><div class="title">比較結果</div><div id="compareResult" class="muted">-</div></div>
+  </section>
+
+  <section id="rankPage" class="hidden">
+    <div class="card"><div class="title">線上排行榜</div><div id="rankStatus" class="muted">讀取中</div><div id="rankBox" class="hidden"><table><thead><tr><th>#</th><th>名稱</th><th>模式</th><th>Min</th><th>Max</th><th>DPM</th><th>更新</th></tr></thead><tbody id="rankBody"></tbody></table></div></div>
+  </section>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+<script>
+const ADMIN_EMAIL='exl78000@gmail.com';
+const LEADERBOARD_COLLECTION='artaleDamageLeaderboard';
+const firebaseConfig={apiKey:"AIzaSyBef1cCwP2uv8kN0A1cA0yopFTU4y-7txs",authDomain:"boss-app-34bcd.firebaseapp.com",projectId:"boss-app-34bcd",storageBucket:"boss-app-34bcd.firebasestorage.app",messagingSenderId:"728632211313",appId:"1:728632211313:web:66f966b8b7ccf6cb3ee8d0",measurementId:"G-PN361HPV2J"};
+let app,auth,db,currentUser=null,isAdmin=false,bless=0,lastCalc=null,appliedA=false,rankUnsub=null;
+const $=id=>document.getElementById(id);const n=id=>{const v=parseFloat($(id).value);return Number.isFinite(v)?v:0};const fmt=x=>Number.isFinite(x)?Math.floor(x).toLocaleString():'-';
+function toast(t){const d=document.createElement('div');d.className='toast';d.textContent=t;document.body.appendChild(d);setTimeout(()=>d.remove(),2300)}
+const weapons=[['xbow','弩手 / 弩','DEX','STR',3.6,3.6],['bow','弓手 / 弓','DEX','STR',3.4,3.4],['gun','槍手 / 火槍','DEX','STR',3.6,3.6],['knuckle','拳霸 / 指虎','STR','DEX',4.8,4.8],['thief','盜賊','LUK','STR+DEX',3.6,3.6],['1hs','單手劍','STR','DEX',4.0,4.0],['2hs','雙手劍','STR','DEX',4.6,4.6],['spear-stab','槍：戳','STR','DEX',5.0,5.0],['spear-swing','槍：砍','STR','DEX',3.0,3.0],['pole-swing','矛：砍','STR','DEX',5.0,5.0],['pole-stab','矛：戳','STR','DEX',3.0,3.0]];
+const modes=[['nl30','夜使者 三飛閃30'],['nl20','夜使者 三飛閃20'],['hero','英雄 無雙劍舞30'],['palaHoly','聖騎士 聖劍30'],['palaFire','聖騎士 火劍30'],['sairRF','槍神 純迅雷'],['sairRFOcto','槍神 迅雷 + 4章魚'],['sairRFOctoPrec','槍神 迅雷 + 4章魚 + 精準'],['sairCannon','槍神 純加農砲'],['sairCannonOcto','槍神 加農砲 + 4章魚'],['sairCannonOctoPrec','槍神 加農砲 + 4章魚 + 精準'],['bmStorm','箭神 純暴風'],['bmPhoenix','箭神 暴風 + 鳳凰']];
+function initOptions(){weaponType.innerHTML=weapons.map(w=>`<option value="${w[0]}">${w[1]}</option>`).join('');aMode.innerHTML=bMode.innerHTML=modes.map(m=>`<option value="${m[0]}">${m[1]}</option>`).join('')}
+function attr(){const main={STR:Math.floor(n('strMain')*(1+bless)),DEX:Math.floor(n('dexMain')*(1+bless)),INT:Math.floor(n('intMain')*(1+bless)),LUK:Math.floor(n('lukMain')*(1+bless))};return{STR:main.STR+n('strSub'),DEX:main.DEX+n('dexSub'),INT:main.INT+n('intSub'),LUK:main.LUK+n('lukSub'),main}}
+function statVal(expr,s){return expr.split('+').reduce((a,k)=>a+(s[k.trim()]||0),0)}
+function calcDamage(){const w=weapons.find(x=>x[0]===weaponType.value)||weapons[0];const s=attr();const main=statVal(w[2],s),sub=statVal(w[3],s);const atk=n('atkWeapon')+n('atkGlove')+n('atkAmmo')+n('atkOther')+(snow.checked?20:0);const mastery=parseFloat($('mastery').value)||0.9;const max=Math.floor(((main*w[4])+sub)*atk/100);const min=Math.floor(((main*w[5]*0.9*mastery)+sub)*atk/100);lastCalc={min,max,main,sub,atk,w,s};damageRange.textContent=(max>0)?`${fmt(min)} ～ ${fmt(max)}`:'-';calcDetail.textContent=(max>0)?`實際主屬 ${main}，副屬 ${sub}，總攻擊力 ${atk}`:'請輸入數值';return lastCalc}
+function rfMult(l){l=Math.max(1,Math.min(30,l||30));if(l<=10)return(100+l*2)/100;if(l<=20)return(142+(l-11)*2)/100;return(182+(l-21)*2)/100}function cannonMult(l){return Math.min(380,265+((l||30)-1)*5)/100}function phoenixMult(l){l=Math.max(1,Math.min(30,l||30));if(l<=10)return(300+l*5)/100;if(l<=20)return(400+(l-10)*5)/100;return(500+(l-20)*5)/100}
+function oovs(p){let min=p.min,max=p.max;if(!(max>0))return 0;const avg=(min+max)/2,sk=p.skill||30,se=p.se,si=p.si,prec=p.precision||20,pho=p.phoenix||30;let dpm=0;if(p.mode==='bmStorm'||p.mode==='bmPhoenix'){dpm=Math.floor(7321100*(avg/5816)*((80+sk)/110));if(p.mode==='bmPhoenix')dpm+=Math.floor(221528*(phoenixMult(pho)/5.5));return dpm}if(p.mode==='nl30'||p.mode==='nl20'){const base=p.mode==='nl30'?5544788:5082638;const seMult=se?(p.mode==='nl30'?1.53:1.578):1;return Math.floor(base*(avg/4171.5)*seMult)}if(p.mode==='hero'){const def=.55*1092.5,sm=2.6+(se?.21:0),hits=si?60000/630:80;return Math.floor((((Math.max(0,min*2.15-def)*sm)+(Math.max(0,max*2.15-def)*sm))/2)*2*hits)}if(p.mode==='palaHoly'||p.mode==='palaFire'){const elem=p.mode==='palaHoly'?1.54:1.98,def=.55*920,sm=7.5+(se?.21:0),hits=si?60000/630:80;return Math.floor((((Math.max(0,min*elem-def)*sm)+(Math.max(0,max*elem-def)*sm))/2)*hits)}if(p.mode.startsWith('sair')){let main=0,octo=0,def=.55*1150,sm=p.mode.includes('Cannon')?cannonMult(sk):rfMult(sk);if(se)sm+=.21;let hits=p.mode.includes('Cannon')?(si?(p.mode.includes('Octo')?336:400):(p.mode.includes('Octo')?312:381)):500;main=Math.floor((((Math.max(0,min-def)*sm)+(Math.max(0,max-def)*sm))/2)*hits);if(p.mode.includes('Prec'))main=Math.floor(main*((110+prec)/100));if(p.mode.includes('Octo'))octo=Math.floor(3756450*(avg/4828.5));return main+octo}return 0}
+function getCfg(prefix){return{name:$(prefix+'Name').value.trim(),mode:$(prefix+'Mode').value,min:n(prefix+'Min'),max:n(prefix+'Max'),skill:n(prefix+'Skill')||30,level:n(prefix+'Level')||200,phoenix:n(prefix+'Phoenix')||30,precision:n(prefix+'Precision')||20,se:$(prefix+'SE').checked,si:$(prefix+'SI').checked}}
+function renderOovs(){const a=getCfg('a'),b=getCfg('b');const ad=oovs(a),bd=oovs(b);aDpm.textContent=ad?fmt(ad):'-';bDpm.textContent=bd?fmt(bd):'-';let msg='-';if(ad&&bd){const diff=Math.abs(ad-bd),win=ad>=bd?'A':'B';msg=`${win} 較高，差距 ${fmt(diff)} DPM（${(diff/Math.min(ad,bd)*100).toFixed(2)}%）`}compareResult.textContent=msg;if(appliedA&&ad&&a.name)saveLeaderboard(a,ad)}
+async function saveLeaderboard(a,dpm){if(!currentUser)return;const modeName=(modes.find(x=>x[0]===a.mode)||[])[1]||a.mode;const id=(a.name+'__'+a.mode).replace(/[\/#?\[\]]/g,'_');await db.collection(LEADERBOARD_COLLECTION).doc(id).set({name:a.name,mode:a.mode,modeName,min:Math.floor(a.min),max:Math.floor(a.max),dpm:Math.floor(dpm),se:!!a.se,si:!!a.si,uid:currentUser.uid,email:currentUser.email,updatedAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true}).catch(e=>toast('排行榜寫入失敗：'+e.message))}
+function applyToA(){const name=charName.value.trim();if(!name){toast('請先輸入角色名稱');charName.focus();return}const c=calcDamage();if(!c||!(c.max>0)){toast('請先完成表攻換算');return}aName.value=name;aMin.value=c.min;aMax.value=c.max;appliedA=true;renderOovs();toast('已套用到 A 配置')}
+function resetBForm(){['bName','bMin','bMax'].forEach(id=>$(id).value='');bSkill.value=30;bLevel.value=200;bPhoenix.value=30;bPrecision.value=20;bSE.checked=false;bSI.checked=false;bMode.selectedIndex=0;renderOovs()}
+function clearCalcForm(){['charName','strMain','strSub','dexMain','dexSub','intMain','intSub','lukMain','lukSub','atkWeapon','atkGlove','atkAmmo','atkOther'].forEach(id=>$(id).value='');snow.checked=false;bless=0;markBless();calcDamage()}
+function markBless(){document.querySelectorAll('#blessBtns button').forEach(b=>b.classList.toggle('gold',parseFloat(b.dataset.v)==bless))}
+function showCalc(){calcPage.classList.remove('hidden');rankPage.classList.add('hidden');tabCalc.classList.remove('gray');tabRank.classList.add('gray')}
+function showRank(){if(!currentUser){toast('請先 Google 登入');showCalc();return}if(!isAdmin){toast('非管理者無法查看排行榜');showCalc();return}calcPage.classList.add('hidden');rankPage.classList.remove('hidden');tabRank.classList.remove('gray');tabCalc.classList.add('gray');listenRank()}
+function listenRank(){if(rankUnsub)return;rankStatus.textContent='讀取排行榜中';rankUnsub=db.collection(LEADERBOARD_COLLECTION).orderBy('dpm','desc').limit(100).onSnapshot(snap=>{rankBox.classList.remove('hidden');rankStatus.textContent=`共 ${snap.size} 筆`;rankBody.innerHTML='';let i=1;snap.forEach(doc=>{const r=doc.data();const t=r.updatedAt&&r.updatedAt.toDate?r.updatedAt.toDate().toLocaleString('zh-TW'):'';rankBody.insertAdjacentHTML('beforeend',`<tr><td>${i++}</td><td>${r.name||''}</td><td>${r.modeName||r.mode||''}</td><td>${fmt(r.min)}</td><td>${fmt(r.max)}</td><td>${fmt(r.dpm)}</td><td>${t}</td></tr>`)});},e=>{rankStatus.textContent='讀取失敗：'+e.message})}
+function initFirebase(){app=firebase.initializeApp(firebaseConfig);auth=firebase.auth();db=firebase.firestore();auth.onAuthStateChanged(u=>{currentUser=u;isAdmin=!!(u&&u.email===ADMIN_EMAIL);authInfo.textContent=u?u.email:'未登入';loginBtn.classList.toggle('hidden',!!u);logoutBtn.classList.toggle('hidden',!u);if(!isAdmin&& !rankPage.classList.contains('hidden'))showCalc();renderOovs()})}
+loginBtn.onclick=()=>auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).catch(e=>toast('Google 登入失敗：'+e.message));logoutBtn.onclick=()=>auth.signOut();tabCalc.onclick=showCalc;tabRank.onclick=showRank;applyA.onclick=applyToA;resetB.onclick=resetBForm;clearCalc.onclick=clearCalcForm;document.querySelectorAll('#blessBtns button').forEach(b=>b.onclick=()=>{bless=parseFloat(b.dataset.v)||0;markBless();calcDamage();renderOovs()});
+['input','change','click'].forEach(ev=>document.addEventListener(ev,e=>{if(e.target.matches('input,select')){calcDamage();renderOovs()}}));
+initOptions();markBless();calcDamage();renderOovs();initFirebase();
+</script>
+</body>
+</html>
